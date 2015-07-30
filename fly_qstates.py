@@ -10,10 +10,11 @@ class FlyState(QState):
         self.flyController = fly_controller
 
     def onEntry(self, e):
-        print(self.name + ' state enter')
-        self.fly.controller.stop()
-        self.fly.render.stop()
+        #print(self.name + ' state enter')
         self.fly.controller = self.flyController
         self.fly.render = self.flyRender
         self.fly.update()
 
+    def onExit(self, e):
+        self.fly.controller.reset()
+        self.fly.render.reset()

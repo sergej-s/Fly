@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui.ui'
 #
-# Created: Tue Jul 28 20:05:50 2015
+# Created: Thu Jul 30 22:57:19 2015
 #      by: pyside-uic 0.2.15 running on PySide 1.2.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,16 +12,25 @@ from PySide import QtCore, QtGui
 class Ui_FlyApp(object):
     def setupUi(self, FlyApp):
         FlyApp.setObjectName("FlyApp")
-        FlyApp.resize(800, 600)
+        FlyApp.resize(801, 600)
         FlyApp.setMinimumSize(QtCore.QSize(0, 0))
         self.centralwidget = QtGui.QWidget(FlyApp)
         self.centralwidget.setObjectName("centralwidget")
         self.gameField_w = QtGui.QWidget(self.centralwidget)
-        self.gameField_w.setGeometry(QtCore.QRect(0, 0, 801, 491))
+        self.gameField_w.setGeometry(QtCore.QRect(0, 0, 500, 500))
         self.gameField_w.setObjectName("gameField_w")
+        self.verticalLayoutWidget = QtGui.QWidget(self.centralwidget)
+        self.verticalLayoutWidget.setGeometry(QtCore.QRect(500, 0, 301, 501))
+        self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
+        self.verticalLayout = QtGui.QVBoxLayout(self.verticalLayoutWidget)
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.flyinfo_te = QtGui.QTextEdit(self.verticalLayoutWidget)
+        self.flyinfo_te.setObjectName("flyinfo_te")
+        self.verticalLayout.addWidget(self.flyinfo_te)
         FlyApp.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(FlyApp)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 31))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 31))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")

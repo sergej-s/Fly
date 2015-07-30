@@ -1,80 +1,80 @@
 from PySide.QtCore import *
 from PySide.QtGui import *
-
+import math
 
 class FlyRender(QObject):
-    def __init__(self, icon, sprites):
+    def __init__(self, icon, max_frame, sprites):
         super(FlyRender, self).__init__()
         self.icon = icon
-        self.animationSpeed = 40
         self.currentFrame = 0
-        self.currentAngle = 0
-
+        self.maxFrame = max_frame
         self.sprites = []
         for sprite in sprites:
             self.sprites.append(QPixmap(sprite))
+        self.icon.setPixmap(self.sprites[0])
+        self.frame_offset = 0
 
     def changeFrame(self):
-        if self.currentFrame == 3:
+        if self.currentFrame == self.maxFrame:
             self.currentFrame = 0
         else:
             self.currentFrame += 1
 
-    def animate(self):
-        self.icon.setPixmap(self.sprites[self.currentFrame])
+    def reset(self):
+        pass
+
+    def update(self, fly, world):
+        self.icon.move(fly.x, fly.y)
+        #transform = QTransform()
+        #transform = transform.scale(math.sqrt(sprite.size().width()), math.sqrt(sprite.size().height()))
+        # print(fly.direction[1])
+        # angle = math.degrees(math.acos(fly.direction[1]))
+        # if fly.direction[1] < 0:
+        #     angle = 360 - angle
+        # print(angle)
+        # transform = transform.rotate(angle)
+        # self.icon.setPixmap(self.sprites[self.currentFrame].transformed(transform))
+        self.icon.setPixmap(self.sprites[self.currentFrame + self.frame_offset])
         self.changeFrame()
-
-    def stop(self):
-        if hasattr(self, 'timer'):
-            self.timer.stop()
-        self.currentFrame = 0
-
-    def start(self, fly, world):
-        print('render update')
-        self.timer = QTimer(self)
-        self.connect(self.timer, SIGNAL('timeout()'), self, SLOT('animate()'))
-        self.timer.start(self.animationSpeed)
 
 
 class FlyingRender(FlyRender):
-    def __init__(self, icon, sprites):
-        super(FlyingRender, self).__init__(icon, sprites)
-        self.icon.setStyleSheet("Qicon { background-color: gray }")
-        self.icon.setPixmap(self.sprites[0])
+    def __init__(self, icon, max_frame, sprites):
+        super(FlyingRender, self).__init__(icon, max_frame, sprites)
 
 
-class SlowpokeRender(FlyRender):
-    def __init__(self, icon, walking_sprites, standing_sprites):
-        self.sprites = walking_sprites + standing_sprites
-        super(SlowpokeRender, self).__init__(icon, self.sprites)
-        self.walkingSprites = walking_sprites
-        self.standingSprites = standing_sprites
-        self.icon.setStyleSheet("Qicon { background-color: gray }")
-        self.icon.setPixmap(self.walkingSprites[0])
-        self.animationSpeed = 40
-        print(self.walkingSprites)
+class WalkingRender(FlyRender):
+    def __init__(self, icon, max_frame, sprites):
+        super(WalkingRender, self).__init__(icon, max_frame, sprites)
 
-    def animate(self):
-        #print(self.walkingSprites[self.currentFrame])
-        self.icon.setPixmap(self.walkingSprites[self.currentFrame])
-        self.changeFrame()
+    def update(self, fly, world):
+        if fly.stupidity > 0.66 * fly.maxStupidity:
+            self.frame_offset = 8
+        elif fly.stupidity < 0.33 * fly.maxStupidity:
+            self.frame_offset = 0
+        else:
+            self.frame_offset = 4
+        super(WalkingRender, self).update(fly, world)
 
-    def start(self, fly, world):
-        print('slowpoke render update')
-        self.timer = QTimer(self)
-        self.connect(self.timer, SIGNAL('timeout()'), self, SLOT('animate()'))
-        self.timer.start(self.animationSpeed)
+
+class StandingRender(FlyRender):
+    def __init__(self, icon, max_frame, sprites):
+        super(StandingRender, self).__init__(icon, max_frame, sprites)
+
+    def update(self, fly, world):
+        if fly.stupidity > 0.66 * fly.maxStupidity:
+            self.frame_offset = 8
+        elif fly.stupidity < 0.33 * fly.maxStupidity:
+            self.frame_offset = 0
+        else:
+            self.frame_offset = 4
+        super(StandingRender, self).update(fly, world)
 
 
 class DeadRender(FlyRender):
-    def __init__(self, parent, sprites):
-        super(DeadRender, self).__init__(parent, sprites)
-        self.icon.setStyleSheet("Qicon { background-color: gray }")
-        self.icon.setPixmap(self.sprites[0])
-        self.animationSpeed = 40
+    def __init__(self, parent, max_frame, sprites):
+        super(DeadRender, self).__init__(parent, max_frame, sprites)
 
-    def start(self, fly, world):
-        print('dead render update')
-        self.timer = QTimer(self)
-        self.connect(self.timer, SIGNAL('timeout()'), self, SLOT('animate()'))
-        self.timer.start(self.animationSpeed)
+    def update(self, fly, world):
+        if self.currentFrame != self.maxFrame:
+            super(DeadRender, self).update(fly, world)
