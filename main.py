@@ -15,7 +15,6 @@ class FlyApp(QMainWindow, ui.Ui_FlyApp):
         super(FlyApp, self).__init__()
         self.setupUi(self)
 
-        print assets.sprites['logo']
         self.Logo_lbl.setPixmap(QPixmap(assets.sprites['logo']))
 
         self.game_gb.hide()
@@ -23,7 +22,6 @@ class FlyApp(QMainWindow, ui.Ui_FlyApp):
         self.gameField_w.setFixedWidth(500)
         self.statScroll_scrl.setFixedHeight(500)
         self.stat_text.setStyleSheet("font-size: 14px")
-        #self.gameField_w.setStyleSheet("QWidget { border: 1px solid black; font-size: 10px}")
         self.setStyleSheet("QWidget { font-size: 22px}")
 
         self.startGame_btn.clicked.connect(self.startGame)
