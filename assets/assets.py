@@ -4,6 +4,7 @@ root = os.path.dirname(__file__)
 maxFrame = 3
 
 sprites = dict(
+    logo=os.path.join(root, 'logo.png'),
     flying1=os.path.join(root, 'fly_fly_00.png'),
     flying2=os.path.join(root, 'fly_fly_01.png'),
     flying3=os.path.join(root, 'fly_fly_02.png'),

@@ -1,24 +1,22 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
-from assets import assets
-import math
-import random
 import ui_ui as ui
+from assets import assets
 from fly import *
 from fly_qstates import *
 from fly_controllers import *
 from fly_renders import *
 from world import *
 
-random.seed()
 
 class FlyApp(QMainWindow, ui.Ui_FlyApp):
     def __init__(self):
         super(FlyApp, self).__init__()
         self.setupUi(self)
+
+        print assets.sprites['logo']
+        self.Logo_lbl.setPixmap(QPixmap(assets.sprites['logo']))
 
         self.game_gb.hide()
         self.gameField_w.setFixedHeight(500)
@@ -26,15 +24,20 @@ class FlyApp(QMainWindow, ui.Ui_FlyApp):
         self.statScroll_scrl.setFixedHeight(500)
         self.stat_text.setStyleSheet("font-size: 14px")
         #self.gameField_w.setStyleSheet("QWidget { border: 1px solid black; font-size: 10px}")
+        self.setStyleSheet("QWidget { font-size: 22px}")
 
         self.startGame_btn.clicked.connect(self.startGame)
-        self.stopGame_btn.clicked.connect(self.stopGame)
+        self.stopGame_btn.clicked.connect(self.pauseGame)
         self.addFly_btn.clicked.connect(self.addFly)
+        self.newGame_btn.clicked.connect(self.newGame)
 
     def startGame(self):
         self.game_gb.show()
+        self.Logo_lbl.hide()
         self.gameSetting_gb.hide()
 
+        #Game speed is parameter that increase game frame rate relatively of default frame rate
+        #GameFrameTime is used in timer to simulate game loop
         self.gameSpeed = self.gameSpeed_sb.value()
         self.gameDefaultFrameRate = 24
         self.gameFrameRate = 6 * self.gameSpeed
@@ -54,23 +57,28 @@ class FlyApp(QMainWindow, ui.Ui_FlyApp):
         self.timers = []
         self.stateMachines = []
 
+        #Timer for statistics updating
         timer = QTimer(self)
         self.connect(timer, SIGNAL('timeout()'), self, SLOT('updateStats()'))
         timer.start(1000)
         self.timers.append(timer)
 
 
-        #self.stat_text.setFixedHeight(16777215)
-
-
-    def stopGame(self):
+    def pauseGame(self):
         self.updateStats()
-        #self.statScroll_scrl.setFixedHeight(280)
-        #self.gameField_w.hide()
-        #self.stopGame_btn.hide()
-        #self.addFly_btn.hide()
-        #self.gameSetting_gb.show()
-        #self.startGame_btn.show()
+        self.stopGame_btn.setText('Продолжить')
+        self.stopGame_btn.clicked.connect(self.resumeGame)
+        for timer in self.timers:
+            timer.stop()
+
+    def resumeGame(self):
+        self.stopGame_btn.setText('Остановить')
+        self.stopGame_btn.clicked.connect(self.pauseGame)
+        for timer in self.timers:
+            timer.start()
+
+    def newGame(self):
+        self.Logo_lbl.show()
         self.game_gb.hide()
         self.gameSetting_gb.show()
         self.world.clearGrid()
@@ -86,15 +94,16 @@ class FlyApp(QMainWindow, ui.Ui_FlyApp):
         self.timers = []
         self.stateMachines = []
 
-        print self.icons
-        print self.flies
 
     def addFly(self):
+        #There is possibility that fly will not be created due to lack of available cells
         fly = self.createFly()
         if fly:
+            #If fly created it is connected with timer which play game loop role.
             self.flies.append(fly)
             timer = QTimer(self)
             self.connect(timer, SIGNAL('timeout()'), fly, SLOT('update()'))
+            #Game frame rate is set to this timer
             timer.start(self.gameFrameTime)
             self.timers.append(timer)
 
@@ -103,18 +112,21 @@ class FlyApp(QMainWindow, ui.Ui_FlyApp):
 
     def createFly(self):
 
+        #Get available cell
         [cell_row, cell_col, cell] = self.world.getRandomAvailibleCell()
 
         if not cell:
             self.addFly_btn.setEnabled(False)
             return 0
 
+        #QLabel is used as fly animation holder
         icon = QLabel(self.gameField_w)
         icon.setFixedWidth(32)
         icon.setFixedHeight(32)
         icon.show()
         self.icons.append(icon)
 
+        #Fly config parameters
         fly_walking_duration = (self.getDurationInFrames(self.flyWalkingDurationMin_sb.value()),
                                 self.getDurationInFrames(self.flyWalkingDurationMax_sb.value()))
         fly_standing_duration = (self.getDurationInFrames(self.flyStandingDurationMin_sb.value()),
@@ -129,6 +141,7 @@ class FlyApp(QMainWindow, ui.Ui_FlyApp):
                           life=(fly_stupidity[0]*fly_life_coef,
                                 fly_stupidity[1]*fly_life_coef))
 
+        #Controllers for each fly state
         standing_controller = StandingController(fly_standing_duration)
         walking_controller = WalkingController(fly_walking_duration)
         flying_controller = FlyingController()
@@ -139,11 +152,13 @@ class FlyApp(QMainWindow, ui.Ui_FlyApp):
             sprites.sort()
             return sprites
 
+        #Renders for each fly state. Renders are connected to animation assets
         walking_render = WalkingRender(icon, assets.maxFrame, get_sprites(assets.sprites, 'walking'))
         standing_render = StandingRender(icon, assets.maxFrame, get_sprites(assets.sprites, 'standing'))
         flying_render = FlyingRender(icon, assets.maxFrame, get_sprites(assets.sprites, 'flying'))
         dead_render = DeadRender(icon, assets.maxFrame, get_sprites(assets.sprites, 'dead'))
 
+        #Create fly with above collected parameters
         fly = Fly(len(self.flies),
                   standing_render,
                   standing_controller,
@@ -152,21 +167,25 @@ class FlyApp(QMainWindow, ui.Ui_FlyApp):
                   cell_col,
                   fly_config)
 
+        #Put fly to cell and move to random point on it
         cell.addFly(fly)
         [x, y] = cell.getRandomPoint([fly.width, fly.height])
         fly.move(x, y)
 
+        #Add number to fly icon to distinguish one fly from another
         icon_id = QLabel(icon)
         icon_id.setStyleSheet("QLabel { font-size: 8px; color: black}")
         icon_id.setText(str(fly.id))
         icon_id.show()
         self.icons.append(icon_id)
 
+        #Create fly states and connect with controllers and renders
         flying_state = FlyState('flying_state', fly, flying_render, flying_controller)
         walking_state = FlyState('walking_state', fly, walking_render, walking_controller)
         standing_state = FlyState('standing_state', fly, standing_render, standing_controller)
         dead_state = FlyState('dead_state', fly, dead_render, dead_controller)
 
+        #Set transition rules for state changing
         flying_state.addTransition(flying_controller, SIGNAL('standing()'), standing_state)
         walking_state.addTransition(walking_controller, SIGNAL('standing()'), standing_state)
         walking_state.addTransition(walking_controller, SIGNAL('dead()'), dead_state)
@@ -174,6 +193,7 @@ class FlyApp(QMainWindow, ui.Ui_FlyApp):
         standing_state.addTransition(standing_controller, SIGNAL('flying()'), flying_state)
         standing_state.addTransition(standing_controller, SIGNAL('dead()'), dead_state)
 
+        #Initialize Qt State Machine
         machine = QStateMachine(self)
         machine.addState(flying_state)
         machine.addState(walking_state)
@@ -183,6 +203,7 @@ class FlyApp(QMainWindow, ui.Ui_FlyApp):
         machine.start()
         self.stateMachines.append(machine)
 
+        #Hack to make statistics text field be bigger than text put in it
         self.stat_text.setMinimumHeight(self.stat_text.height() + 80)
 
         return fly

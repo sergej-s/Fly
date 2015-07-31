@@ -1,6 +1,8 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
+#Renders are responsive for rendering each of the fly state.
+#They use QLabel and Pixmap to simulate animation
 
 class FlyRender(QObject):
     def __init__(self, icon, max_frame, sprites):

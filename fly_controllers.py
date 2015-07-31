@@ -12,7 +12,8 @@ def getNormalizedVector(vector):
     vector_norm = [vector[0]/length, vector[1]/length]
     return vector_norm
 
-
+#Controllers are responsible for AI of fly
+#Separate controller for each state
 class FlyController(QObject):
     flying = pyqtSignal()
     standing = pyqtSignal()
@@ -22,11 +23,14 @@ class FlyController(QObject):
     def __init__(self, state_duration=(50, 100)):
         super(FlyController, self).__init__()
 
+        #Some controllers work only certain time.
+        #If duration time exceeded then controller emit signal for state change
         self._stateMinDuration = state_duration[0]
         self._stateMaxDuration = state_duration[1]
         self._stateDuration = self._stateMaxDuration
         self._started = True
 
+    #Reset controller when state is entered
     def reset(self):
         self._stateDuration = random.randint(self._stateMinDuration, self._stateMaxDuration)
         self._started = True
@@ -34,9 +38,11 @@ class FlyController(QObject):
     def _isFinished(self):
         return self._stateDuration <= 0
 
+    #Update method is invoked every game frame
     def update(self, fly, world):
         self._stateDuration -= 1
 
+    #Choose direction and destination point to which fly should move
     def _directFly(self, fly, world):
         cell = world.grid[fly.cellRow][fly.cellCol]
         [x, y] = cell.getRandomPoint([fly.width, fly.height])
@@ -48,6 +54,8 @@ class FlyController(QObject):
         self._direction = vector
         fly.direction = vector
 
+    #Move fly with small step according fly speed.
+    #If fly has reached destination then return that fly is stopped
     def _moveFly(self, fly, world):
         x = fly.x + self._direction[0] * fly.speed
         y = fly.y + self._direction[1] * fly.speed
@@ -78,6 +86,7 @@ class FlyingController(FlyController):
         if not self._direction:
             self._directFly(fly, world)
 
+        #If fly has reached choosed point it starts to thinking and switches to standing state
         if not self._moveFly(fly, world):
             fly.goSlowpoke()
             self.standing.emit()
@@ -100,6 +109,7 @@ class WalkingController(FlyController):
             self.dead.emit()
             return
 
+        #If fly is stopped being stupid or stopped walking then switch to standing state
         if (not fly.isSlowpoke()) or self._isFinished():
             self.standing.emit()
             return
@@ -124,6 +134,7 @@ class StandingController(FlyController):
             self.dead.emit()
             return
 
+        #If fly is stopped being stupid then try to move to another cell
         if not fly.isSlowpoke():
             cell_neighbor_ind = random.randint(0, 3) #0 - top, 1 - right, 2 - bottom, 3 - left
             next_cell_row = -1
@@ -142,6 +153,7 @@ class StandingController(FlyController):
                 next_cell_col = fly.cellCol
 
             next_cell = world.getCell(next_cell_row, next_cell_col)
+            #If cell exists and available then move to it
             if next_cell and next_cell.isAvalible():
                 current_cell = world.getCell(fly.cellRow, fly.cellCol)
                 current_cell.removeFly(fly)
@@ -161,5 +173,6 @@ class DeadController(FlyController):
     def __init__(self):
         super(DeadController, self).__init__()
 
+    #If fly is dead them do nothing
     def update(self, fly, world):
         pass

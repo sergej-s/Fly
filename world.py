@@ -23,9 +23,8 @@ class Cell(QObject):
         self.flies = []
         self.setText()
 
-    def __del__(self):
-        print 'cell del'
-        self.icon.setParent(None)
+    #def __del__(self):
+    #    self.icon.setParent(None)
 
     def setText(self):
         self.icon.setText(str(self.capacity()) + '/' + str(self.maxCapacity))
@@ -94,9 +93,8 @@ class World(QObject):
         else:
             return [-1, -1, None]
 
-    def __del__(self):
-        print 'world del'
-        self.clearGrid()
+    #def __del__(self):
+    #    self.clearGrid()
 
     def clearGrid(self):
         map(lambda cell: cell.icon.setParent(None), sum(self.grid, []))

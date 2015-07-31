@@ -31,7 +31,6 @@ class Fly(QObject):
         self.direction = [0, 1]
 
     def __del__(self):
-        print 'fly del'
         self.render = None
         self.controller = None
         self.world = None
