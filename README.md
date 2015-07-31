@@ -6,7 +6,7 @@ https://www.python.org/ftp/python/2.7.8/python-2.7.8.msi
 
 http://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.4/PyQt4-4.11.4-gpl-Py2.7-Qt4.8.7-x32.exe
 
-Тестировал под Windows 8
+Тестировал под Windows 8 и Ubuntu 14
 
 -----
 
