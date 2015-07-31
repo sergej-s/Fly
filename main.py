@@ -215,10 +215,14 @@ class FlyApp(QMainWindow, ui.Ui_FlyApp):
                + '------------------------------' + '\n'
         for fly in self.flies:
             fly_life = fly.life * self.gameFrameTime
+            if fly_life > 0:
+                fly_speed = fly.mileage / fly_life
+            else:
+                fly_speed = 0
             stat += 'муха №' + str(fly.id) + ':' + '\n' \
                    + '    пробег ' + str(int(fly.mileage)) + '\n' \
                    + '    возраст ' + str(int(fly_life)) + '/' + str(int(fly.lifetime * self.gameFrameTime)) + '\n' \
-                   + '    скорость ' + "{:5.2f}".format(fly.mileage / fly_life) + '\n'
+                   + '    скорость ' + "{:5.2f}".format(fly_speed) + '\n'
         self.stat_text.setText(stat)
 
 
