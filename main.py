@@ -79,6 +79,7 @@ class FlyApp(QMainWindow, ui.Ui_FlyApp):
         self.Logo_lbl.show()
         self.game_gb.hide()
         self.gameSetting_gb.show()
+        self.addFly_btn.setEnabled(True)
         self.world.clearGrid()
         self.world = None
         for icon in self.icons:
