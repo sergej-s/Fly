@@ -1,7 +1,7 @@
 from PyQt4.QtCore import *
 import math
 import random
-
+random.seed()
 
 def getVectorLength(vector):
     return math.sqrt(vector[0]**2 + vector[1]**2)
@@ -19,108 +19,108 @@ class FlyController(QObject):
     walking = pyqtSignal()
     dead = pyqtSignal()
 
-    def __init__(self, icon, state_duration=(50, 100)):
+    def __init__(self, state_duration=(50, 100)):
         super(FlyController, self).__init__()
-        self.icon = icon
 
-        self.stateMaxDuration = state_duration[1]
-        self.stateMinDuration = state_duration[0]
-        self.stateDuration = self.stateMaxDuration
-        self.started = 1
+        self._stateMinDuration = state_duration[0]
+        self._stateMaxDuration = state_duration[1]
+        self._stateDuration = self._stateMaxDuration
+        self._started = True
 
     def reset(self):
-        self.stateDuration = random.randint(self.stateMinDuration, self.stateMaxDuration)
-        self.started = 1
+        self._stateDuration = random.randint(self._stateMinDuration, self._stateMaxDuration)
+        self._started = True
 
-    def isFinished(self):
-        return self.stateDuration <= 0
+    def _isFinished(self):
+        return self._stateDuration <= 0
 
     def update(self, fly, world):
-        self.stateDuration -= 1
+        self._stateDuration -= 1
 
-    def directFly(self, fly, world):
+    def _directFly(self, fly, world):
         cell = world.grid[fly.cellRow][fly.cellCol]
         [x, y] = cell.getRandomPoint([fly.width, fly.height])
         x = x - fly.x
         y = y - fly.y
         vector = getNormalizedVector([x, y])
-        self.maxPathLength = getVectorLength([x, y])
-        self.origin = [fly.x, fly.y]
-        self.direction = vector
+        self._maxPathLength = getVectorLength([x, y])
+        self._origin = [fly.x, fly.y]
+        self._direction = vector
         fly.direction = vector
 
-    def moveFly(self, fly, world):
-        x = fly.x + self.direction[0] * fly.speed
-        y = fly.y + self.direction[1] * fly.speed
+    def _moveFly(self, fly, world):
+        x = fly.x + self._direction[0] * fly.speed
+        y = fly.y + self._direction[1] * fly.speed
 
-        path_length = getVectorLength([x - self.origin[0], y - self.origin[1]])
+        path_length = getVectorLength([x - self._origin[0], y - self._origin[1]])
 
-        if path_length >= self.maxPathLength:
-            self.direction = 0
+        if path_length >= self._maxPathLength:
+            self._direction = 0
             return 0 #fly stopped
         else:
             fly.x = x
             fly.y = y
+            fly.mileage += path_length
             return 1 #fly moved
 
 
 class FlyingController(FlyController):
-    def __init__(self, icon):
-        super(FlyingController, self).__init__(icon)
-        self.direction = 0
+    def __init__(self):
+        super(FlyingController, self).__init__()
+        self._direction = 0
 
     def update(self, fly, world):
         super(FlyingController, self).update(fly, world)
-        if self.started:
-            self.started = 0
-            self.direction = 0
+        if self._started:
+            self._started = False
+            self._direction = 0
 
-        if not self.direction:
-            self.directFly(fly, world)
+        if not self._direction:
+            self._directFly(fly, world)
 
-        if not self.moveFly(fly, world):
+        if not self._moveFly(fly, world):
             fly.goSlowpoke()
             self.standing.emit()
             return
 
 
 class WalkingController(FlyController):
-    def __init__(self, icon, state_duration):
-        super(WalkingController, self).__init__(icon, state_duration)
-        self.direction = 0
+    def __init__(self, state_duration):
+        super(WalkingController, self).__init__(state_duration)
+        self._direction = 0
 
     def update(self, fly, world):
         super(WalkingController, self).update(fly, world)
 
-        if self.started:
-            self.started = 0
-            self.direction = 0
+        if self._started:
+            self._started = False
+            self._direction = 0
 
-        if fly.life <= 0:
+        if fly.isDead():
             self.dead.emit()
             return
 
-        if (not fly.isSlowpoke()) or self.isFinished():
+        if (not fly.isSlowpoke()) or self._isFinished():
             self.standing.emit()
             return
 
-        if not self.direction:
-            self.directFly(fly, world)
+        if not self._direction:
+            self._directFly(fly, world)
 
-        self.moveFly(fly, world)
+        self._moveFly(fly, world)
 
 
 class StandingController(FlyController):
-    def __init__(self, icon, state_duration):
-        super(StandingController, self).__init__(icon, state_duration)
+    def __init__(self, state_duration):
+        super(StandingController, self).__init__(state_duration)
 
     def update(self, fly, world):
         super(StandingController, self).update(fly, world)
-        if self.started:
-            self.started = 0
-            self.direction = 0
+        if self._started:
+            self._started = False
+            self._direction = 0
 
-        if fly.life <= 0:
+        if fly.isDead():
             self.dead.emit()
             return
 
@@ -153,13 +153,13 @@ class StandingController(FlyController):
             else:
                 fly.goSlowpoke()
 
-        if self.isFinished():
+        if self._isFinished():
             self.walking.emit()
 
 
 class DeadController(FlyController):
-    def __init__(self, icon):
-        super(DeadController, self).__init__(icon)
+    def __init__(self):
+        super(DeadController, self).__init__()
 
     def update(self, fly, world):
         pass

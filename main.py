@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from assets import assets
@@ -10,17 +13,18 @@ from fly_controllers import *
 from fly_renders import *
 from world import *
 
+random.seed()
 
 class FlyApp(QMainWindow, ui.Ui_FlyApp):
     def __init__(self):
         super(FlyApp, self).__init__()
         self.setupUi(self)
 
-        self.gameField_w.hide()
-        self.stopGame_btn.hide()
-        self.addFly_btn.hide()
+        self.game_gb.hide()
         self.gameField_w.setFixedHeight(500)
         self.gameField_w.setFixedWidth(500)
+        self.statScroll_scrl.setFixedHeight(500)
+        self.stat_text.setStyleSheet("font-size: 14px")
         #self.gameField_w.setStyleSheet("QWidget { border: 1px solid black; font-size: 10px}")
 
         self.startGame_btn.clicked.connect(self.startGame)
@@ -28,13 +32,13 @@ class FlyApp(QMainWindow, ui.Ui_FlyApp):
         self.addFly_btn.clicked.connect(self.addFly)
 
     def startGame(self):
-        self.gameField_w.show()
-        self.stopGame_btn.show()
-        self.addFly_btn.show()
+        self.game_gb.show()
         self.gameSetting_gb.hide()
-        self.startGame_btn.hide()
 
-        self.game_speed = math.floor(1000/self.gameSpeed_sb.value())
+        self.gameSpeed = self.gameSpeed_sb.value()
+        self.gameDefaultFrameRate = 24
+        self.gameFrameRate = 6 * self.gameSpeed
+        self.gameFrameTime = math.floor(1000/self.gameFrameRate)
 
         world_cell_count = self.gameFieldCellCount_sb.value()
         world_cell_capacity = self.gameFieldCellCapacity_sb.value()
@@ -46,30 +50,77 @@ class FlyApp(QMainWindow, ui.Ui_FlyApp):
                            world_cell_capacity)
 
         self.flies = []
+        self.icons = []
+        self.timers = []
+        self.stateMachines = []
+
+        timer = QTimer(self)
+        self.connect(timer, SIGNAL('timeout()'), self, SLOT('updateStats()'))
+        timer.start(1000)
+        self.timers.append(timer)
+
+
+        #self.stat_text.setFixedHeight(16777215)
+
 
     def stopGame(self):
-        self.gameField_w.hide()
-        self.stopGame_btn.hide()
-        self.addFly_btn.hide()
+        self.updateStats()
+        #self.statScroll_scrl.setFixedHeight(280)
+        #self.gameField_w.hide()
+        #self.stopGame_btn.hide()
+        #self.addFly_btn.hide()
+        #self.gameSetting_gb.show()
+        #self.startGame_btn.show()
+        self.game_gb.hide()
         self.gameSetting_gb.show()
-        self.startGame_btn.show()
+        self.world.clearGrid()
+        self.world = None
+        for icon in self.icons:
+            icon.setParent(None)
+        for timer in self.timers:
+            timer.deleteLater()
+        for machine in self.stateMachines:
+            machine.stop()
+        self.flies = []
+        self.icons = []
+        self.timers = []
+        self.stateMachines = []
+
+        print self.icons
+        print self.flies
 
     def addFly(self):
         fly = self.createFly()
-        self.flies.append(fly)
-        timer = QTimer(self)
-        self.connect(timer, SIGNAL('timeout()'), fly, SLOT('update()'))
-        timer.start(self.game_speed)
+        if fly:
+            self.flies.append(fly)
+            timer = QTimer(self)
+            self.connect(timer, SIGNAL('timeout()'), fly, SLOT('update()'))
+            timer.start(self.gameFrameTime)
+            self.timers.append(timer)
+
+    def getDurationInFrames(self, time):
+        return math.floor(time/self.gameDefaultFrameRate)
 
     def createFly(self):
+
+        [cell_row, cell_col, cell] = self.world.getRandomAvailibleCell()
+
+        if not cell:
+            self.addFly_btn.setEnabled(False)
+            return 0
+
         icon = QLabel(self.gameField_w)
         icon.setFixedWidth(32)
         icon.setFixedHeight(32)
         icon.show()
+        self.icons.append(icon)
 
-        fly_walking_duration = (self.flyWalkingDurationMin_sb.value(), self.flyWalkingDurationMax_sb.value())
-        fly_standing_duration = (self.flyStandingDurationMin_sb.value(), self.flyStandingDurationMax_sb.value())
-        fly_stupidity = (self.flyStupidityMin_sb.value(), self.flyStupidityMax_sb.value())
+        fly_walking_duration = (self.getDurationInFrames(self.flyWalkingDurationMin_sb.value()),
+                                self.getDurationInFrames(self.flyWalkingDurationMax_sb.value()))
+        fly_standing_duration = (self.getDurationInFrames(self.flyStandingDurationMin_sb.value()),
+                                 self.getDurationInFrames(self.flyStandingDurationMax_sb.value()))
+        fly_stupidity = (self.getDurationInFrames(self.flyStupidityMin_sb.value()),
+                         self.getDurationInFrames(self.flyStupidityMax_sb.value()))
         fly_life_coef = self.flyLifeCoefficient_sb.value()
         fly_config = dict(width=icon.width(),
                           height=icon.height(),
@@ -78,10 +129,10 @@ class FlyApp(QMainWindow, ui.Ui_FlyApp):
                           life=(fly_stupidity[0]*fly_life_coef,
                                 fly_stupidity[1]*fly_life_coef))
 
-        standing_controller = StandingController(icon, fly_standing_duration)
-        walking_controller = WalkingController(icon, fly_walking_duration)
-        flying_controller = FlyingController(icon)
-        dead_controller = DeadController(icon)
+        standing_controller = StandingController(fly_standing_duration)
+        walking_controller = WalkingController(fly_walking_duration)
+        flying_controller = FlyingController()
+        dead_controller = DeadController()
 
         def get_sprites(sprites, group):
             sprites = [s for (n, s) in sprites.iteritems() if group in n]
@@ -93,12 +144,23 @@ class FlyApp(QMainWindow, ui.Ui_FlyApp):
         flying_render = FlyingRender(icon, assets.maxFrame, get_sprites(assets.sprites, 'flying'))
         dead_render = DeadRender(icon, assets.maxFrame, get_sprites(assets.sprites, 'dead'))
 
-        fly = Fly(standing_render,
+        fly = Fly(len(self.flies),
+                  standing_render,
                   standing_controller,
                   self.world,
-                  random.randint(0, self.world.rowCount - 1),
-                  random.randint(0, self.world.colCount - 1),
+                  cell_row,
+                  cell_col,
                   fly_config)
+
+        cell.addFly(fly)
+        [x, y] = cell.getRandomPoint([fly.width, fly.height])
+        fly.move(x, y)
+
+        icon_id = QLabel(icon)
+        icon_id.setStyleSheet("QLabel { font-size: 8px; color: black}")
+        icon_id.setText(str(fly.id))
+        icon_id.show()
+        self.icons.append(icon_id)
 
         flying_state = FlyState('flying_state', fly, flying_render, flying_controller)
         walking_state = FlyState('walking_state', fly, walking_render, walking_controller)
@@ -119,8 +181,27 @@ class FlyApp(QMainWindow, ui.Ui_FlyApp):
         machine.addState(dead_state)
         machine.setInitialState(standing_state)
         machine.start()
+        self.stateMachines.append(machine)
+
+        self.stat_text.setMinimumHeight(self.stat_text.height() + 80)
 
         return fly
+
+    @pyqtSlot()
+    def updateStats(self):
+        stat = 'Общее кол-во мух: ' + str(len(self.flies)) + '\n' \
+               + 'пробег измеряется в пикселях' + '\n' \
+               + 'возраст в мс' + '\n' \
+               + 'скорость в пиксель/мс' + '\n' \
+               + '------------------------------' + '\n'
+        for fly in self.flies:
+            fly_life = fly.life * self.gameFrameTime
+            stat += 'муха №' + str(fly.id) + ':' + '\n' \
+                   + '    пробег ' + str(int(fly.mileage)) + '\n' \
+                   + '    возраст ' + str(int(fly_life)) + '/' + str(int(fly.lifetime * self.gameFrameTime)) + '\n' \
+                   + '    скорость ' + "{:5.2f}".format(fly.mileage / fly_life) + '\n'
+        self.stat_text.setText(stat)
+
 
 if __name__ == '__main__':
     app = QApplication([])

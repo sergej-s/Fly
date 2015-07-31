@@ -9,6 +9,12 @@ class FlyState(QState):
         self.flyRender = fly_render
         self.flyController = fly_controller
 
+    def __del__(self):
+        #print 'state del'
+        self.fly = None
+        self.flyRender = None
+        self.flyController = None
+
     def onEntry(self, e):
         #print(self.name + ' state enter')
         self.fly.controller = self.flyController

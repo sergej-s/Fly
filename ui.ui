@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>600</height>
+    <height>650</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>800</width>
-    <height>600</height>
+    <height>650</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>800</width>
-    <height>600</height>
+    <height>650</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -77,20 +77,7 @@
          <item row="7" column="0">
           <widget class="QLabel" name="gameSpeed_lbl">
            <property name="text">
-            <string>Скорость игры (кадров в секунду)</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="1">
-          <widget class="QSpinBox" name="flyStandingDurationMin_sb">
-           <property name="minimum">
-            <number>10</number>
-           </property>
-           <property name="maximum">
-            <number>100</number>
-           </property>
-           <property name="value">
-            <number>20</number>
+            <string>Скорость игры</string>
            </property>
           </widget>
          </item>
@@ -106,7 +93,7 @@
             <number>1</number>
            </property>
            <property name="maximum">
-            <number>10</number>
+            <number>99</number>
            </property>
            <property name="value">
             <number>3</number>
@@ -116,27 +103,30 @@
          <item row="5" column="2">
           <widget class="QSpinBox" name="flyStandingDurationMax_sb">
            <property name="minimum">
-            <number>10</number>
+            <number>100</number>
            </property>
            <property name="maximum">
+            <number>9999</number>
+           </property>
+           <property name="singleStep">
             <number>100</number>
            </property>
            <property name="value">
-            <number>50</number>
+            <number>3000</number>
            </property>
           </widget>
          </item>
          <item row="6" column="0">
           <widget class="QLabel" name="flySpeed_lbl">
            <property name="text">
-            <string>Скорость полета/позания</string>
+            <string>Скорость полета/позания (пикселей/мс)</string>
            </property>
           </widget>
          </item>
          <item row="4" column="0">
           <widget class="QLabel" name="flyWalkingDuration_lbl">
            <property name="text">
-            <string>Длительность стадии ползания (мин/макс)</string>
+            <string>Длительность стадии ползания (мин/макс в мс)</string>
            </property>
           </widget>
          </item>
@@ -149,13 +139,16 @@
             </sizepolicy>
            </property>
            <property name="minimum">
-            <number>1</number>
+            <number>100</number>
            </property>
            <property name="maximum">
+            <number>9999</number>
+           </property>
+           <property name="singleStep">
             <number>100</number>
            </property>
            <property name="value">
-            <number>50</number>
+            <number>3000</number>
            </property>
           </widget>
          </item>
@@ -168,36 +161,39 @@
             </sizepolicy>
            </property>
            <property name="minimum">
-            <number>1</number>
+            <number>100</number>
            </property>
            <property name="maximum">
-            <number>100</number>
+            <number>9999</number>
            </property>
            <property name="singleStep">
-            <number>1</number>
+            <number>10</number>
            </property>
            <property name="value">
-            <number>100</number>
+            <number>6000</number>
            </property>
           </widget>
          </item>
          <item row="3" column="0">
           <widget class="QLabel" name="flyStupidity_lbl">
            <property name="text">
-            <string>Мухотупость (мин/макс)</string>
+            <string>Мухотупость (мин/макс в мс)</string>
            </property>
           </widget>
          </item>
          <item row="4" column="1">
           <widget class="QSpinBox" name="flyWalkingDurationMin_sb">
            <property name="minimum">
-            <number>10</number>
+            <number>100</number>
            </property>
            <property name="maximum">
+            <number>9999</number>
+           </property>
+           <property name="singleStep">
             <number>100</number>
            </property>
            <property name="value">
-            <number>20</number>
+            <number>1000</number>
            </property>
           </widget>
          </item>
@@ -213,7 +209,7 @@
             <number>1</number>
            </property>
            <property name="maximum">
-            <number>10</number>
+            <number>8</number>
            </property>
            <property name="value">
             <number>4</number>
@@ -223,33 +219,23 @@
          <item row="5" column="0">
           <widget class="QLabel" name="flyStandingDuration_lbl">
            <property name="text">
-            <string>Длительность стадии стояния (мин/макс)</string>
+            <string>Длительность стадии стояния (мин/макс в мс)</string>
            </property>
           </widget>
          </item>
          <item row="4" column="2">
           <widget class="QSpinBox" name="flyWalkingDurationMax_sb">
            <property name="minimum">
-            <number>10</number>
+            <number>100</number>
            </property>
            <property name="maximum">
+            <number>9999</number>
+           </property>
+           <property name="singleStep">
             <number>100</number>
            </property>
            <property name="value">
-            <number>50</number>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="1" colspan="2">
-          <widget class="QSpinBox" name="gameSpeed_sb">
-           <property name="minimum">
-            <number>10</number>
-           </property>
-           <property name="maximum">
-            <number>1000</number>
-           </property>
-           <property name="value">
-            <number>24</number>
+            <number>3000</number>
            </property>
           </widget>
          </item>
@@ -260,16 +246,48 @@
            </property>
           </widget>
          </item>
+         <item row="7" column="1" colspan="2">
+          <widget class="QSpinBox" name="gameSpeed_sb">
+           <property name="minimum">
+            <number>2</number>
+           </property>
+           <property name="maximum">
+            <number>12</number>
+           </property>
+           <property name="singleStep">
+            <number>1</number>
+           </property>
+           <property name="value">
+            <number>4</number>
+           </property>
+          </widget>
+         </item>
          <item row="2" column="1" colspan="2">
           <widget class="QSpinBox" name="flyLifeCoefficient_sb">
            <property name="minimum">
             <number>1</number>
            </property>
            <property name="maximum">
-            <number>10</number>
+            <number>99</number>
            </property>
            <property name="value">
-            <number>5</number>
+            <number>4</number>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="1">
+          <widget class="QSpinBox" name="flyStandingDurationMin_sb">
+           <property name="minimum">
+            <number>100</number>
+           </property>
+           <property name="maximum">
+            <number>9999</number>
+           </property>
+           <property name="singleStep">
+            <number>100</number>
+           </property>
+           <property name="value">
+            <number>1000</number>
            </property>
           </widget>
          </item>
@@ -288,82 +306,137 @@
          </property>
         </spacer>
        </item>
+       <item>
+        <widget class="QPushButton" name="startGame_btn">
+         <property name="text">
+          <string>Старт</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
     <item>
-     <widget class="QWidget" name="gameField_w" native="true">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
+     <widget class="QGroupBox" name="game_gb">
+      <property name="title">
+       <string>Игра</string>
       </property>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <layout class="QHBoxLayout" name="gameField_lo">
+         <item>
+          <widget class="QWidget" name="gameField_w" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QScrollArea" name="statScroll_scrl">
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="widgetResizable">
+            <bool>true</bool>
+           </property>
+           <widget class="QWidget" name="statScrollContent">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>697</width>
+              <height>133</height>
+             </rect>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_3">
+             <item>
+              <widget class="QTextBrowser" name="stat_text">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
+               <property name="verticalScrollBarPolicy">
+                <enum>Qt::ScrollBarAlwaysOff</enum>
+               </property>
+               <property name="horizontalScrollBarPolicy">
+                <enum>Qt::ScrollBarAlwaysOff</enum>
+               </property>
+               <property name="overwriteMode">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="gameButtons_lo">
+         <item>
+          <widget class="QPushButton" name="addFly_btn">
+           <property name="text">
+            <string>Добавить муху</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="stopGame_btn">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Стоп</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
      </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="startGame_btn">
-      <property name="text">
-       <string>Старт</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="QPushButton" name="addFly_btn">
-        <property name="text">
-         <string>Добавить муху</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="stopGame_btn">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="text">
-         <string>Стоп</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>800</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menuFile">
-    <property name="title">
-     <string>Файл</string>
-    </property>
-    <addaction name="separator"/>
-    <addaction name="actionNewGame"/>
-    <addaction name="actionExit"/>
-   </widget>
-   <widget class="QMenu" name="menuAbout">
-    <property name="title">
-     <string>О программе</string>
-    </property>
-   </widget>
-   <addaction name="menuFile"/>
-   <addaction name="menuAbout"/>
-  </widget>
-  <action name="actionNewGame">
+  <action name="startGame_act">
    <property name="text">
     <string>New Game</string>
    </property>
   </action>
-  <action name="actionExit">
+  <action name="appClose_act">
    <property name="text">
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="action">
+   <property name="text">
+    <string>Мухоемкость</string>
    </property>
   </action>
  </widget>

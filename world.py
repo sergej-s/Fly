@@ -15,13 +15,17 @@ class Cell(QObject):
         self.icon = icon
         self.icon.setFixedWidth(width)
         self.icon.setFixedHeight(height)
-        self.icon.setStyleSheet("QLabel { background-color: LightGray; border: 1px solid black; font-size: 10px}")
-        self.icon.setAlignment(Qt.AlignTop)
+        self.icon.setStyleSheet("QLabel { background-color: LightGray; border: 1px solid black; font-size: 10px; color: gray}")
+        self.icon.setAlignment(Qt.AlignBottom)
         self.icon.move(x, y)
         self.icon.show()
         self.maxCapacity = capacity
         self.flies = []
         self.setText()
+
+    def __del__(self):
+        print 'cell del'
+        self.icon.setParent(None)
 
     def setText(self):
         self.icon.setText(str(self.capacity()) + '/' + str(self.maxCapacity))
@@ -77,3 +81,23 @@ class World(QObject):
             return self.grid[row][col]
         else:
             return 0
+
+    def getRandomAvailibleCell(self):
+        available_cells = []
+        for row_ind, cells in enumerate(self.grid):
+            for col_ind, cell in enumerate(cells):
+                if cell.isAvalible():
+                    available_cells.append([row_ind, col_ind, cell])
+        if len(available_cells) > 0:
+            cell = available_cells[random.randint(0, len(available_cells) - 1)]
+            return cell
+        else:
+            return [-1, -1, None]
+
+    def __del__(self):
+        print 'world del'
+        self.clearGrid()
+
+    def clearGrid(self):
+        map(lambda cell: cell.icon.setParent(None), sum(self.grid, []))
+
