@@ -1,5 +1,5 @@
-from PySide.QtCore import *
-from PySide.QtGui import *
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
 import random
 
 class Cell(QObject):
@@ -18,6 +18,7 @@ class Cell(QObject):
         self.icon.setStyleSheet("QLabel { background-color: LightGray; border: 1px solid black; font-size: 10px}")
         self.icon.setAlignment(Qt.AlignTop)
         self.icon.move(x, y)
+        self.icon.show()
         self.maxCapacity = capacity
         self.flies = []
         self.setText()

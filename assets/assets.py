@@ -1,6 +1,8 @@
 import os
 root = os.path.dirname(__file__)
 
+maxFrame = 3
+
 sprites = dict(
     flying1=os.path.join(root, 'fly_fly_00.png'),
     flying2=os.path.join(root, 'fly_fly_01.png'),

@@ -1,4 +1,4 @@
-from PySide.QtCore import *
+from PyQt4.QtCore import *
 import math
 import random
 
@@ -14,10 +14,10 @@ def getNormalizedVector(vector):
 
 
 class FlyController(QObject):
-    flying = Signal()
-    standing = Signal()
-    walking = Signal()
-    dead = Signal()
+    flying = pyqtSignal()
+    standing = pyqtSignal()
+    walking = pyqtSignal()
+    dead = pyqtSignal()
 
     def __init__(self, icon, state_duration=(50, 100)):
         super(FlyController, self).__init__()
@@ -100,7 +100,7 @@ class WalkingController(FlyController):
             self.dead.emit()
             return
 
-        if not fly.isSlowpoke() or self.isFinished():
+        if (not fly.isSlowpoke()) or self.isFinished():
             self.standing.emit()
             return
 

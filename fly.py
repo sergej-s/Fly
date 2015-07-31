@@ -1,4 +1,4 @@
-from PySide.QtCore import *
+from PyQt4.QtCore import *
 import random
 
 class Fly(QObject):
@@ -32,6 +32,7 @@ class Fly(QObject):
     def goSlowpoke(self):
         self.stupidity = self.maxStupidity
 
+    @pyqtSlot()
     def update(self):
         #print('life', self.life)
         self.stupidity -= 1
